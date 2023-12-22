@@ -1,5 +1,11 @@
 import shade
 
+# Custom physics handling for the player
+const
+  maxSpeed = 400.0
+  acceleration = 100.0
+  jumpForce = -350.0
+
 proc createIdleAnimation(player: Sprite): Animation =
   const
     frameDuration = 0.10
@@ -74,7 +80,53 @@ proc playAnimation*(player: Player, name: string) =
   if player.animationPlayer.currentAnimationName != name:
     player.animationPlayer.playAnimation(name)
 
+proc physicsProcess(this: Player, deltaTime: float) =
+  let
+    leftStickX = Input.leftStick.x
+    leftPressed = Input.isKeyPressed(K_LEFT) or leftStickX < 0
+    rightPressed = Input.isKeyPressed(K_RIGHT) or leftStickX > 0
+
+  var
+    x: float = this.velocityX
+    y: float = this.velocityY
+
+  proc run(x, y: var float) =
+    ## Handles player running
+    if leftPressed == rightPressed:
+      this.playAnimation("idle")
+      return
+
+    let accel =
+      if leftStickX == 0.0:
+        acceleration
+      else:
+        acceleration * abs(leftStickX)
+
+    if rightPressed:
+      x = min(this.velocityX + accel, maxSpeed)
+      if this.sprite.scale.x < 0.0:
+        this.sprite.scale = vector(abs(this.sprite.scale.x), this.sprite.scale.y)
+    else:
+      x = max(this.velocityX - accel, -maxSpeed)
+      if this.sprite.scale.y > 0.0:
+        this.sprite.scale = vector(-1 * abs(this.sprite.scale.x), this.sprite.scale.y)
+
+    this.playAnimation("run")
+
+  proc friction() =
+    x *= 0.85
+
+  friction()
+  run(x, y)
+
+  if this.isOnGround and Input.wasActionJustPressed("jump"):
+    echo "JUMP!"
+    y += jumpForce
+
+  this.velocity = vector(x, y)
+
 method update*(this: Player, deltaTime: float) =
+  this.physicsProcess(deltaTime)
   procCall PhysicsBody(this).update(deltaTime)
   this.animationPlayer.update(deltaTime)
 
