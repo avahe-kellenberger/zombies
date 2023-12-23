@@ -6,6 +6,10 @@ const
   acceleration = 100.0
   jumpForce = -350.0
 
+type Player* = ref object of PhysicsBody
+  animationPlayer: AnimationPlayer
+  sprite*: Sprite
+
 proc createIdleAnimation(player: Sprite): Animation =
   const
     frameDuration = 0.10
@@ -62,10 +66,6 @@ proc createCollisionShape(): CollisionShape =
   result = newCollisionShape(aabb(-8, -13, 8, 13))
   result.material = initMaterial(1, 0, 0.97)
 
-type Player* = ref object of PhysicsBody
-  animationPlayer: AnimationPlayer
-  sprite*: Sprite
-
 proc createNewPlayer*(): Player =
   result = Player()
   var collisionShape = createCollisionShape()
@@ -120,7 +120,6 @@ proc physicsProcess(this: Player, deltaTime: float) =
   run(x, y)
 
   if this.isOnGround and Input.wasActionJustPressed("jump"):
-    echo "JUMP!"
     y += jumpForce
 
   this.velocity = vector(x, y)

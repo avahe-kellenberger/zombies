@@ -1,5 +1,6 @@
 import shade
 import ../characters/player as playerPkg
+import ../characters/zombie as zombiePkg
 
 type Terrain = ref object of PhysicsBody
   sprite: Sprite
@@ -76,6 +77,11 @@ proc newForestLevel*(): Scene =
   let rightWall = newTerrain(wallShape, rightWallSprite)
   rightWall.x = ground.x + ground.width / 2 - rightWall.width / 2
   rightWall.y = leftWall.y
+
+  let zombie = newZombie()
+  zombie.x = player.x - 200
+  zombie.y = ground.y - groundShape.height / 2 - zombie.collisionShape.height / 2
+  layer.addChild(zombie)
 
   layer.addChild(ground)
   layer.addChild(leftWall)
