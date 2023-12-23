@@ -2,9 +2,9 @@ import shade
 
 # Custom physics handling for the player
 const
-  maxSpeed = 400.0
+  maxSpeed = 200.0
   acceleration = 100.0
-  jumpForce = -350.0
+  jumpForce = -250.0
 
 type Player* = ref object of PhysicsBody
   animationPlayer: AnimationPlayer
