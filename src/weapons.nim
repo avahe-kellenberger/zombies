@@ -1,14 +1,18 @@
 import shade
 
-type Weapon* = ref object
-  name*: string
-  sprite*: Sprite
-  ammo*: int
-  maxAmmo*: int
-  magazineCapacity*: int
-  ## Number of seconds between attacks
-  attackCooldown*: float
-  automatic*: bool
+type
+  Weapon* = ref object
+    name*: string
+    sprite*: Sprite
+    ammo*: int
+    maxAmmo*: int
+    magazineCapacity*: int
+    ## Number of seconds between attacks
+    attackCooldown*: float
+    automatic*: bool
+
+  Projectile* = ref object of PhysicsBody
+    sprite*: Sprite
 
 proc newWeapon(
   name: string,
@@ -36,4 +40,7 @@ proc newPistol*(): Weapon =
   if pistolImage == nil:
     pistolImage = Images.loadImage("./assets/images/weapons/pistol.png", FILTER_NEAREST).image
   result = newWeapon("Pistol", newSprite(pistolImage), 0, 255, 8, 0.18, false)
+
+proc fire*(this: Weapon): Projectile =
+  discard
 

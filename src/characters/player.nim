@@ -26,8 +26,8 @@ proc createIdleAnimation(player: Sprite): Animation =
   # Change the spritesheet coordinate
   let animCoordFrames: seq[KeyFrame[IVector]] =
     @[
-      (ivector(0, 5), 0.0),
-      (ivector(10, 5), animDuration - frameDuration),
+      (ivector(0, 1), 0.0),
+      (ivector(7, 1), animDuration - frameDuration),
     ]
   idleAnim.addNewAnimationTrack(
     player.frameCoords,
@@ -37,7 +37,7 @@ proc createIdleAnimation(player: Sprite): Animation =
 
 proc createRunAnimation(player: Sprite): Animation =
   const
-    frameDuration = 0.08
+    frameDuration = 0.12
     frameCount = 8
     animDuration = frameCount * frameDuration
 
@@ -47,8 +47,8 @@ proc createRunAnimation(player: Sprite): Animation =
   # Change the spritesheet coordinate
   let animCoordFrames: seq[KeyFrame[IVector]] =
     @[
-      (ivector(0, 7), 0.0),
-      (ivector(7, 7), animDuration - frameDuration),
+      (ivector(0, 0), 0.0),
+      (ivector(7, 0), animDuration - frameDuration),
     ]
   runAnim.addNewAnimationTrack(
     player.frameCoords,
@@ -56,18 +56,108 @@ proc createRunAnimation(player: Sprite): Animation =
   )
   return runAnim
 
+proc createJumpAnimation(player: Sprite): Animation =
+  const
+    frameDuration = 0.12
+    frameCount = 2
+    animDuration = frameCount * frameDuration
+
+  var anim = newAnimation(animDuration, false)
+
+  # Change the spritesheet coordinate
+  let animCoordFrames: seq[KeyFrame[IVector]] =
+    @[
+      (ivector(0, 2), 0.0),
+      (ivector(1, 2), animDuration - frameDuration),
+    ]
+  anim.addNewAnimationTrack(
+    player.frameCoords,
+    animCoordFrames
+  )
+  return anim
+
+proc createFallAnimation(player: Sprite): Animation =
+  const
+    frameDuration = 0.12
+    frameCount = 2
+    animDuration = frameCount * frameDuration
+
+  var anim = newAnimation(animDuration, false)
+
+  # Change the spritesheet coordinate
+  let animCoordFrames: seq[KeyFrame[IVector]] =
+    @[
+      (ivector(2, 2), 0.0),
+      (ivector(3, 2), animDuration - frameDuration),
+    ]
+  anim.addNewAnimationTrack(
+    player.frameCoords,
+    animCoordFrames
+  )
+  return anim
+
+proc createLandAnimation(player: Sprite): Animation =
+  const
+    frameDuration = 0.12
+    frameCount = 2
+    animDuration = frameCount * frameDuration
+
+  var anim = newAnimation(animDuration, false)
+
+  # Change the spritesheet coordinate
+  let animCoordFrames: seq[KeyFrame[IVector]] =
+    @[
+      (ivector(4, 2), 0.0),
+      (ivector(5, 2), animDuration - frameDuration),
+    ]
+  anim.addNewAnimationTrack(
+    player.frameCoords,
+    animCoordFrames
+  )
+  return anim
+
+proc createHurtAnimation(player: Sprite): Animation =
+  const
+    frameDuration = 0.12
+    frameCount = 8
+    animDuration = frameCount * frameDuration
+
+  var anim = newAnimation(animDuration, false)
+
+  # Change the spritesheet coordinate
+  let animCoordFrames: seq[KeyFrame[IVector]] =
+    @[
+      (ivector(6, 2), 0.0),
+      (ivector(7, 2), frameDuration * 2),
+      (ivector(6, 2), frameDuration * 3),
+      (ivector(7, 2), frameDuration * 4),
+      (ivector(6, 2), frameDuration * 5),
+      (ivector(7, 2), frameDuration * 6),
+      (ivector(6, 2), frameDuration * 7),
+      (ivector(7, 2), frameDuration * 8)
+    ]
+  anim.addNewAnimationTrack(
+    player.frameCoords,
+    animCoordFrames
+  )
+  return anim
+
 proc createPlayerSprite(): Sprite =
-  let (_, image) = Images.loadImage("./assets/images/king.png", FILTER_NEAREST)
-  result = newSprite(image, 11, 8)
+  let (_, image) = Images.loadImage("./assets/images/man.png", FILTER_NEAREST)
+  result = newSprite(image, 8, 4)
 
 proc createAnimPlayer(sprite: Sprite): AnimationPlayer =
   result = newAnimationPlayer()
   result.addAnimation("idle", createIdleAnimation(sprite))
   result.addAnimation("run", createRunAnimation(sprite))
+  result.addAnimation("jump", createJumpAnimation(sprite))
+  result.addAnimation("fall", createFallAnimation(sprite))
+  result.addAnimation("land", createLandAnimation(sprite))
+  result.addAnimation("hurt", createHurtAnimation(sprite))
   result.playAnimation("idle")
 
 proc createCollisionShape(): CollisionShape =
-  result = newCollisionShape(aabb(-8, -13, 8, 13))
+  result = newCollisionShape(aabb(-9, -18, 9, 18))
   result.material = initMaterial(1, 0, 0.97)
 
 proc newPlayer*(): Player =
@@ -76,7 +166,7 @@ proc newPlayer*(): Player =
   initPhysicsBody(PhysicsBody(result), collisionShape)
 
   let sprite = createPlayerSprite()
-  sprite.offset = vector(8.0, 1.0)
+  sprite.offset = vector(0.0, 0.0)
   result.sprite = sprite
   result.animationPlayer = createAnimPlayer(sprite)
 

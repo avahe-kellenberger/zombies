@@ -7,7 +7,7 @@ proc newForestLevel*(): Scene =
   result = Scene()
   initScene(result)
 
-  Game.clearColor = newColor(0, 26, 26)
+  Game.clearColor = newColor(16, 32, 38)
 
   let layer = newPhysicsLayer()
   result.addLayer(layer)
@@ -20,7 +20,7 @@ proc newForestLevel*(): Scene =
   # Track the player with the camera.
   result.camera = newCamera(player, 0.15, easeInAndOutQuadratic)
   result.camera.setLocation(player.getLocation())
-  result.camera.z = 0.55
+  result.camera.z = 0.60
   result.camera.offset.y = -30
 
   let
