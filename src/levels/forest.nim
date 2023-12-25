@@ -12,14 +12,16 @@ proc newForestLevel*(): Scene =
   let layer = newPhysicsLayer()
   result.addLayer(layer)
 
-  let player = createNewPlayer()
+  let player = newPlayer()
   player.x = 1920 / 2
   player.y = 900
   layer.addChild(player)
 
   # Track the player with the camera.
-  result.camera = newCamera(player, 0.25, easeInAndOutQuadratic)
+  result.camera = newCamera(player, 0.15, easeInAndOutQuadratic)
+  result.camera.setLocation(player.getLocation())
   result.camera.z = 0.55
+  result.camera.offset.y = -30
 
   let
     (_, groundImage) = Images.loadImage("./assets/images/ground.png", FILTER_NEAREST)

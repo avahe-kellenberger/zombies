@@ -1,14 +1,18 @@
 import shade
 
+import ../weapons
+
 # Custom physics handling for the player
 const
-  maxSpeed = 200.0
+  maxSpeed = 100.0
   acceleration = 100.0
   jumpForce = -250.0
+  weaponPixelOffset = 18.0
 
 type Player* = ref object of PhysicsBody
   animationPlayer: AnimationPlayer
   sprite*: Sprite
+  weapon*: Weapon
 
 proc createIdleAnimation(player: Sprite): Animation =
   const
@@ -66,7 +70,7 @@ proc createCollisionShape(): CollisionShape =
   result = newCollisionShape(aabb(-8, -13, 8, 13))
   result.material = initMaterial(1, 0, 0.97)
 
-proc createNewPlayer*(): Player =
+proc newPlayer*(): Player =
   result = Player()
   var collisionShape = createCollisionShape()
   initPhysicsBody(PhysicsBody(result), collisionShape)
@@ -76,15 +80,16 @@ proc createNewPlayer*(): Player =
   result.sprite = sprite
   result.animationPlayer = createAnimPlayer(sprite)
 
+  result.weapon = newPistol()
+
 proc playAnimation*(player: Player, name: string) =
   if player.animationPlayer.currentAnimationName != name:
     player.animationPlayer.playAnimation(name)
 
 proc physicsProcess(this: Player, deltaTime: float) =
   let
-    leftStickX = Input.leftStick.x
-    leftPressed = Input.isKeyPressed(K_LEFT) or leftStickX < 0
-    rightPressed = Input.isKeyPressed(K_RIGHT) or leftStickX > 0
+    leftPressed = Input.isActionPressed("run_left")
+    rightPressed = Input.isActionPressed("run_right")
 
   var
     x: float = this.velocityX
@@ -96,18 +101,12 @@ proc physicsProcess(this: Player, deltaTime: float) =
       this.playAnimation("idle")
       return
 
-    let accel =
-      if leftStickX == 0.0:
-        acceleration
-      else:
-        acceleration * abs(leftStickX)
-
     if rightPressed:
-      x = min(this.velocityX + accel, maxSpeed)
+      x = min(this.velocityX + acceleration, maxSpeed)
       if this.sprite.scale.x < 0.0:
         this.sprite.scale = vector(abs(this.sprite.scale.x), this.sprite.scale.y)
     else:
-      x = max(this.velocityX - accel, -maxSpeed)
+      x = max(this.velocityX - acceleration, -maxSpeed)
       if this.sprite.scale.y > 0.0:
         this.sprite.scale = vector(-1 * abs(this.sprite.scale.x), this.sprite.scale.y)
 
@@ -131,4 +130,18 @@ method update*(this: Player, deltaTime: float) =
 
 Player.renderAsChildOf(PhysicsBody):
   this.sprite.render(ctx, this.x + offsetX, this.y + offsetY)
+
+  if this.weapon != nil:
+    # Render weapon sprite rotated and flipped about the player's center, with an offset
+    this.weapon.sprite.render(ctx, this.x + offsetX, this.y + offsetY)
+    let mouseLocInWorld = Game.scene.camera.screenToWorldCoord(Input.mouseLocation(), 1.0 - Game.scene.camera.z)
+    let angleToCursor = this.getLocation().getAngleTo(mouseLocInWorld)
+    this.weapon.sprite.rotation = angleToCursor
+
+    if mouseLocInWorld.x > this.x:
+      this.weapon.sprite.scale.y = 1.0
+      this.weapon.sprite.offset = fromAngle(angleToCursor) * weaponPixelOffset
+    else:
+      this.weapon.sprite.scale.y = -1.0
+      this.weapon.sprite.offset = fromAngle(-angleToCursor) * weaponPixelOffset
 
